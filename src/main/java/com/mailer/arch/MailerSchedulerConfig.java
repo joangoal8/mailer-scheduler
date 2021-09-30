@@ -1,4 +1,4 @@
-package com.mailer.infraestructure;
+package com.mailer.arch;
 
 import org.jobrunr.configuration.JobRunr;
 import org.jobrunr.scheduling.JobScheduler;
