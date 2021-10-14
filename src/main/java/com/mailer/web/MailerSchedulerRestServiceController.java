@@ -1,11 +1,16 @@
 package com.mailer.web;
 
+import com.mailer.model.EmailTransaction;
 import com.mailer.service.MailerSchedulerService;
 import com.mailer.web.contract.EmailRequest;
 import com.mailer.web.mapper.MailerSchedulerMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/mailer-scheduler/v1",
@@ -36,23 +43,38 @@ public class MailerSchedulerRestServiceController {
         return MailerSchedulerConstants.PONG_MESSAGE;
     }
 
-    @GetMapping(value = "/jobs/mails")
-    public String getJobsMails() {
-        return MailerSchedulerConstants.PONG_MESSAGE;
-    }
-
     @PostMapping(value = "/jobs/mails")
-    public ResponseEntity<String> postJobMail(@RequestParam(required = false, name = "scheduleTo") String scheduleTo,
+    public ResponseEntity<EmailTransaction> postJobMail(@RequestParam(required = false, name = "scheduleTo") String scheduleTo,
                                               @RequestBody EmailRequest emailRequest) {
         try {
             var scheduleTime = Objects.nonNull(scheduleTo)
               ? LocalDateTime.parse(scheduleTo)
               : LocalDateTime.now().plusMinutes(1);
-            return ResponseEntity.ok(mailerSchedulerService.addEmailJob(scheduleTime,
-              mailerSchedulerMapper.map(emailRequest)));
+            return new ResponseEntity<>(mailerSchedulerService.addEmailJob(scheduleTime,
+              mailerSchedulerMapper.map(emailRequest)), HttpStatus.CREATED);
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @DeleteMapping(value = "/jobs/mails/{id}")
+    public String getMailJob(@PathVariable("id") String id) {
+        return MailerSchedulerConstants.PONG_MESSAGE;
+    }
+
+    @GetMapping(value = "/mails/{id}")
+    public ResponseEntity<EmailTransaction> getMail(@PathVariable("id") Integer id) {
+        Optional<EmailTransaction> email = mailerSchedulerService.getEmail(id);
+        return email.isPresent()
+          ? ResponseEntity.of(email)
+          : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(value = "/mails")
+    public String getMails(@RequestParam(name = "sender", required = false) String sender,
+                           @RequestParam(name = "receiver", required = false) String receiver,
+                           @RequestParam(name = "scheduledAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date scheduledAt) {
+        return MailerSchedulerConstants.PONG_MESSAGE;
     }
 
 }
