@@ -5,7 +5,6 @@ import com.mailer.service.MailerSchedulerService;
 import com.mailer.web.contract.EmailRequest;
 import com.mailer.web.mapper.MailerSchedulerMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -45,7 +43,7 @@ public class MailerSchedulerRestServiceController {
 
     @PostMapping(value = "/jobs/mails")
     public ResponseEntity<EmailTransaction> postJobMail(@RequestParam(required = false, name = "scheduleTo") String scheduleTo,
-                                              @RequestBody EmailRequest emailRequest) {
+                                                        @RequestBody EmailRequest emailRequest) {
         try {
             var scheduleTime = Objects.nonNull(scheduleTo)
               ? LocalDateTime.parse(scheduleTo)
@@ -58,8 +56,9 @@ public class MailerSchedulerRestServiceController {
     }
 
     @DeleteMapping(value = "/jobs/mails/{id}")
-    public String getMailJob(@PathVariable("id") String id) {
-        return MailerSchedulerConstants.PONG_MESSAGE;
+    public ResponseEntity<Void> getMailJob(@PathVariable("id") Integer id) {
+        mailerSchedulerService.deleteEmailJob(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(value = "/mails/{id}")
@@ -68,13 +67,6 @@ public class MailerSchedulerRestServiceController {
         return email.isPresent()
           ? ResponseEntity.of(email)
           : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping(value = "/mails")
-    public String getMails(@RequestParam(name = "sender", required = false) String sender,
-                           @RequestParam(name = "receiver", required = false) String receiver,
-                           @RequestParam(name = "scheduledAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date scheduledAt) {
-        return MailerSchedulerConstants.PONG_MESSAGE;
     }
 
 }

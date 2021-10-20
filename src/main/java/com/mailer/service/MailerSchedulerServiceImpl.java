@@ -39,4 +39,13 @@ public class MailerSchedulerServiceImpl implements MailerSchedulerService {
       .setReceiver(email.getReceiver()).setEmail(email.toString())
       .setScheduleTime(scheduleTime).build());
   }
+
+  @Override
+  public void deleteEmailJob(Integer id) {
+    emailTransactionRepository.findById(id).ifPresent(emailTransaction -> {
+      emailTransactionRepository.deleteById(id);
+      jobScheduler.delete(emailTransaction.getJobId());
+    });
+  }
+
 }

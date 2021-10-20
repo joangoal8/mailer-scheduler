@@ -12,4 +12,6 @@ public interface MailerSchedulerService {
 
   EmailTransaction addEmailJob(LocalDateTime scheduleTime, Email email);
 
+  void deleteEmailJob(Integer id);
+
 }
