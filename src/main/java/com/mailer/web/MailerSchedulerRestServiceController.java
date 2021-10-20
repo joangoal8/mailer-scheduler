@@ -1,10 +1,12 @@
 package com.mailer.web;
 
 import com.mailer.model.EmailTransaction;
+import com.mailer.model.FilterParams;
 import com.mailer.service.MailerSchedulerService;
 import com.mailer.web.contract.EmailRequest;
 import com.mailer.web.mapper.MailerSchedulerMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
@@ -67,6 +70,18 @@ public class MailerSchedulerRestServiceController {
         return email.isPresent()
           ? ResponseEntity.of(email)
           : ResponseEntity.notFound().build();
+    }
+
+    //TODO Add search/filter endpoint
+    @GetMapping(value = "/mails")
+    public ResponseEntity<String> getMails(@RequestParam(name = "sender", required = false) String sender,
+                                                           @RequestParam(name = "receiver", required = false) String receiver,
+                                                           @RequestParam(name = "scheduledAt", required = false)
+                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate scheduledTime) {
+        FilterParams filterParams = mailerSchedulerMapper.mapFilterParams(sender, receiver, scheduledTime);
+        return Objects.nonNull(filterParams) ? ResponseEntity
+          .ok(mailerSchedulerService.filterEmailTransactions(filterParams))
+          : ResponseEntity.badRequest().build();
     }
 
 }

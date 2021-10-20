@@ -4,6 +4,7 @@ import com.mailer.model.EmailTransaction;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EmailTransactionRepository extends JpaRepository<EmailTransaction, Integer> {
@@ -15,5 +16,23 @@ public interface EmailTransactionRepository extends JpaRepository<EmailTransacti
   List<EmailTransaction> findByReceiver(String receiver);
 
   List<EmailTransaction> findByReceiver(String receiver, Sort sort);
+
+  List<EmailTransaction> findBySenderAndReceiver(String sender, String receiver, Sort sort);
+
+  List<EmailTransaction> findByScheduleTimeBetween(LocalDateTime scheduleTimeIni,
+                                                   LocalDateTime scheduleTimeEnd);
+
+  List<EmailTransaction> findBySenderAndScheduleTimeBetween(String sender,
+                                                            LocalDateTime scheduleTimeIni,
+                                                            LocalDateTime scheduleTimeEnd);
+
+  List<EmailTransaction> findByReceiverAndScheduleTimeBetween(String receiver,
+                                                              LocalDateTime scheduleTimeIni,
+                                                              LocalDateTime scheduleTimeEnd);
+
+  List<EmailTransaction> findBySenderAndReceiverAndScheduleTimeBetween(String sender,
+                                                                       String receiver,
+                                                                       LocalDateTime scheduleTimeIni,
+                                                                       LocalDateTime scheduleTimeEnd);
 
 }
